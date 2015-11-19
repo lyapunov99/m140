@@ -1,0 +1,252 @@
+% !TEX TS-program = pdflatex
+% !TEX encoding = UTF-8 Unicode
+
+% This is a simple template for a LaTeX document using the "article" class.
+% See "book", "report", "letter" for other types of document.
+
+\documentclass[14pt]{article} % use larger type; default would be 10pt
+
+\usepackage{hyperref}
+\usepackage[utf8]{inputenc} % set input encoding (not needed with XeLaTeX)
+\usepackage{listings}
+\lstset{language=Java}
+
+%%% Examples of Article customizations
+% These packages are optional, depending whether you want the features they provide.
+% See the LaTeX Companion or other references for full information.
+
+%%% PAGE DIMENSIONS
+\usepackage{geometry} % to change the page dimensions
+\geometry{a4paper} % or letterpaper (US) or a5paper or....
+% \geometry{margins=2in} % for example, change the margins to 2 inches all round
+% \geometry{landscape} % set up the page for landscape
+%   read geometry.pdf for detailed page layout information
+
+\usepackage{graphicx} % support the \includegraphics command and options
+
+% \usepackage[parfill]{parskip} % Activate to begin paragraphs with an empty line rather than an indent
+
+%%% PACKAGES
+\usepackage{booktabs} % for much better looking tables
+\usepackage{array} % for better arrays (eg matrices) in maths
+\usepackage{paralist} % very flexible & customisable lists (eg. enumerate/itemize, etc.)
+\usepackage{verbatim} % adds environment for commenting out blocks of text & for better verbatim
+\usepackage{subfig} % make it possible to include more than one captioned figure/table in a single float
+% These packages are all incorporated in the memoir class to one degree or another...
+
+%%% HEADERS & FOOTERS
+\usepackage{fancyhdr} % This should be set AFTER setting up the page geometry
+\pagestyle{fancy} % options: empty , plain , fancy
+\renewcommand{\headrulewidth}{0pt} % customise the layout...
+\lhead{}\chead{}\rhead{}
+\lfoot{}\cfoot{\thepage}\rfoot{}
+
+%%% SECTION TITLE APPEARANCE
+\usepackage{sectsty}
+\allsectionsfont{\sffamily\mdseries\upshape} % (See the fntguide.pdf for font help)
+% (This matches ConTeXt defaults)
+
+%%% ToC (table of contents) APPEARANCE
+\usepackage[nottoc,notlof,notlot]{tocbibind} % Put the bibliography in the ToC
+\usepackage[titles,subfigure]{tocloft} % Alter the style of the Table of Contents
+\renewcommand{\cftsecfont}{\rmfamily\mdseries\upshape}
+\renewcommand{\cftsecpagefont}{\rmfamily\mdseries\upshape} % No bold!
+
+%%% END Article customizations
+
+%%% The "real" document content comes below...
+
+\title{Algorithm Analysis Basics}
+\author{B. Smith}
+%\date{} % Activate to display a given date or no date (if empty),
+         % otherwise the current date is printed 
+
+\begin{document}
+\maketitle
+
+\section{Motivation}
+
+In computer science, when coding algorithms and subsequently making efforts to compare performance of algorithm performance, we have come up with a language of sorts.  Although we most certainly could talk in terms of "time" it takes for the algorithm to complete its task, this time would change with every machine possibly, and possibly with the multi-tasking load of the machine.  So what we do is characterize the algorithm by looking at what particular function approximates the algorithm as a function of time as N gets very large, i.e., what happens \textit{asymptotically.} This notation is called \textit{Big O} or \textit{Asymptotic} notation.
+
+
+\subsection{The meaning of efficiency: the n-body problem of physics }
+
+A galaxy is a system of stars, dark matter, and other stuff. Our star is part of the \textit{Milky Way} galaxy, but again, it's only one of many stars.  Galaxies  that have ``only'' 10 million ($10^7$) stars are considered ``dwarf'' galaxies, whereas giant galaxies may have a hundred trillion,  or $10^{14}$ stars.  So stars/suns make up a galaxy, and planets make up a solar system.  (Interestingly, dark matter probably accounts for 90\% of the te mass of most galaxies.)  Best guess is that there are about 170 billion  ($1.7 \times 10^{11}$) galaxies in the observable universe.  Clearly, with $10^{11}$ and galaxies and $10^7$ stars per galaxy on the low end, we can safely say that we have over $10^{20}$ stars in the universe as we know it.     
+
+In the late 1600's, the "law of universal gravitation" was induced by Newton's observations.  In a nutshell, every point mass in the universe attracts every other point mass with a force that is directly proportional to the product of their masses, and inversely proportional to the square of the distance between them.
+
+
+\begin{center}
+$F_1 = F_2 = G \frac{m_1 m_2}{r^2}$
+\end{center}
+
+
+
+
+Newton's law has since been superseded by Einstein's general theory of relativity, published in 1916, but it still accurately enough describes the dynamics of galaxies and solar systems.  Einstein's GTR is needed for extreme precision or when dealing with extremely heavy and dense objects.
+
+This simple formula can be used to predict what happens when celestial bodies are considered.  We know that F = ma, and can therefore determine the acceleration of a masses due to outside forces of other bodies. NB: $a = F/m$, so $a_1 = F_1/m_1 + F_2/m_2$ +  \ldots  \\   I.e., one body is influenced by many, many other bodies.  Knowing the force, we know the acceleration.
+
+
+
+
+
+\begin{verbatim}
+
+
+
+
+
+
+ 
+                       bodies       force calculations
+m1 -- m2                2                1
+
+
+  
+
+m1 ---- m2              3                3
+  \     /
+     m3
+
+
+
+m1 ---- m2               4               6
+|    X   |
+m3 ---- m4
+
+
+For 5 bodies:
+
+                            connected to:        bodies       force calculations
+m1 -- 4 edges              {2,3,4,5}               5 bodies        1+2+3+4 = 10    
+m2 -- 3 edges              {3,4,5}
+m3 -- 2 edges              {4,5}
+m4 -- 1 edges              {5}
+
+\end{verbatim}
+
+Mass 1 is drawn as connected to the other 4  objects.  Mass 2 is drawn with connections to 3 unconnected objects (1 of its connections is already accounted for.)
+
+\subsection{Closed Form for Arithmetic Series}
+Generally, for N bodies we get   $1 + 2 + 3 + \ldots + (n-1)$  force calculations
+
+This arithmetic progression is equivalent to $n(n-1)/2$ and can be shown by adding $S_n = 1 + 2+ \ldots +(n-1)$ and
+$S_n = (n-1) + (n-2) + (n-3) + \ldots + 2 + 1$, term by term:  $2S_n = n(n-1)$.  Solve for $S_n$.
+
+What this means for us is that the number of force calculations for the n-body problem is on the order of $n^2$.  I.e.,
+to model what happens when you have 100 bodies would require $100(100-1)/2 \approx 100^2/2$
+
+Imagine the number of force calculations required to simulate a galaxy! If we compute the forces in this manner, and if we can do one force every nanosecond ($10^{-9}$), how long would it take us to model the movement of $x=10^{20}$ bodies?  $10^{-9} \times x(x-1)/2$ seconds.
+
+Luckily, more efficient algorithms have been developed that are not $n^2$, but rather $n \log_2 n$.  This means that an algorithm that takes the above number of seconds would now take  $10^{-9} \times x \log x $ seconds.  Barnes-Hut is such an algorithm.
+
+So efficiency (or complexity) is the study of how well an algorithm performs: you put in data, you get out data. Efficient algorithms minimize the resources required to complete a task, and those resources may be memory used, or time required by the program to perform its task.
+
+
+\subsection{How much time is it really?}
+
+So we've seen is that there are multiple ways to solve a problem, one of which may take years, and the other may complete the task in minutes or even seconds.  An $N^2$ algorithm is more efficient than an N lg N algorithm.  We will express algorithms in a generic fashion, in terms of their growth, which can be seen by their asymptotic nature, i.e., their profile as N gets large.  Algorithms that are $N^2, N^3, 2^N, N!$ all have different profiles.  Each profile is considered a "family" in the sense that $N^2$ curves, whether they be $5N^2, 2N^2+3N-2$, etc., all look quite similar as N goes to inf.
+
+We will use primarily Big-Oh notation to succinctly describe algorithm efficiency.  For example, An algorithm whose growth function is $N(N-1)/2 = (N^2 - N)/2$ is dominated by the higher order exponent term, which means that if $N=100,000 = 10^5$, then clearly $N^2/N = 10^{5\times 2}/10$, or $10^9$;  the linear term is not even one percent of the magnitude of the expression.  It's because of this, that we can ignore the linear term and just simply say that the $N^2 + N + 3$ for example is on the order of $N^2$, or big-oh of $N^2$, or $O(N^2)$, all equivalent expressions of the same idea.
+
+\subsection{Growth of Functions: Profiles of Functions}
+In math 140, we will see primarily the following math functions used to describe efficiency:
+\\  \\
+1 \\
+log N \\
+N \\
+$N \log N$ \\
+$N^2$ \\
+$N^3$ \\
+$2^N$ \\
+
+
+
+
+Consider two different methods for searching for an item that's in a sorted array:
+a) linear search
+b) binary search
+
+Problem:
+Given the following array of items, find a specific value from the array:
+
+
+\begin{tabular} { |c | c  | c | c | c  | c | c | c  | c |   }
+3 & 6 &  8 & 12 & 7 & 13 & 19 & 22    \\ 
+\end{tabular}
+
+
+
+
+\begin{lstlisting} [frame=single]
+int linSearch(int target)
+{
+  //return the position of the found item
+  //otherwise return -1 if not found
+
+  int pos = -1;
+
+  for(int i =0; i< list.length; i++)
+  {
+    if( list[i] == target)
+    {  pos = i;
+       break;
+    }
+  }
+  return pos;
+}
+\end{lstlisting}
+
+
+
+This algorithm is about $N$ or $O(N)$ for worst case efficiency.
+If it takes 1ms/opn, and $N = 2^{32} \approx 4 \times10^9$, then $0.001s \times 2^{32} = 49$ days
+
+
+If we could find an algorithm that is $\log_2(2^{32}) = 32$, we would have one that takes $0.001s \times 32= 0.032$ seconds.  Binary search is an example of an lg(N) algorithm
+
+\begin{lstlisting} [frame=single]
+int binSearch( int target)
+{
+  while ( r >= l )
+  {
+    int m = (l+r)/2;
+    if ( list[m] == target) return m;
+    if ( list[m] > target )  l = m + 1;
+       else  r = m - 1;
+  }
+return -1;
+}
+ \end{lstlisting}
+ 
+
+ 
+0  1  2   3   4    5   6    7     (index)  \\
+3  6  7   9  15  17  18   21   (array contents)
+
+l = 0, r = 7:    m = (0+7)/3,  list[m] = 9  \\
+- since \lstinline!  target < 9!,   ( ie $6 < 9$)  \\  
+- look in left half and repeat steps  \\ 
+
+
+\lstinline! r=m-1! yields  3-1 =2  \\
+\lstinline! l=0, r=2!:       m = (0+2)/2 =1,  list[m] = 6  \\
+
+
+Notice that there is a repeated "halving."
+
+For example, if we start if with 32 elements, how many times can we halve the list until there's only 1 item left?
+
+What about 1024 items?
+
+
+Importantly:   $2^5 = 32$   and $\log_2(32) = \log_2( 2^5)  = 5$
+
+The number of times you can halve a number is linked to the $\log_2$ value of that number.
+
+ 
+ Cutting in half repeatedly often makes for an efficient, lg(N) algorithm.
+
+
+\end{document}

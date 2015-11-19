@@ -1,0 +1,203 @@
+% !TEX TS-program = pdflatex
+% !TEX encoding = UTF-8 Unicode
+
+% This is a simple template for a LaTeX document using the "article" class.
+% See "book", "report", "letter" for other types of document.
+
+\documentclass[11pt]{article} % use larger type; default would be 10pt
+
+\usepackage[utf8]{inputenc} % set input encoding (not needed with XeLaTeX)
+
+%%% Examples of Article customizations
+% These packages are optional, depending whether you want the features they provide.
+% See the LaTeX Companion or other references for full information.
+
+%%% PAGE DIMENSIONS
+\usepackage{geometry} % to change the page dimensions
+\geometry{a4paper} % or letterpaper (US) or a5paper or....
+% \geometry{margins=2in} % for example, change the margins to 2 inches all round
+% \geometry{landscape} % set up the page for landscape
+%   read geometry.pdf for detailed page layout information
+
+\usepackage{graphicx} % support the \includegraphics command and options
+
+% \usepackage[parfill]{parskip} % Activate to begin paragraphs with an empty line rather than an indent
+
+%%% PACKAGES
+\usepackage{booktabs} % for much better looking tables
+\usepackage{array} % for better arrays (eg matrices) in maths
+\usepackage{paralist} % very flexible & customisable lists (eg. enumerate/itemize, etc.)
+\usepackage{verbatim} % adds environment for commenting out blocks of text & for better verbatim
+\usepackage{subfig} % make it possible to include more than one captioned figure/table in a single float
+% These packages are all incorporated in the memoir class to one degree or another...
+
+%%% HEADERS & FOOTERS
+\usepackage{fancyhdr} % This should be set AFTER setting up the page geometry
+\pagestyle{fancy} % options: empty , plain , fancy
+\renewcommand{\headrulewidth}{0pt} % customise the layout...
+\lhead{}\chead{}\rhead{}
+\lfoot{}\cfoot{\thepage}\rfoot{}
+
+%%% SECTION TITLE APPEARANCE
+\usepackage{sectsty}
+\allsectionsfont{\sffamily\mdseries\upshape} % (See the fntguide.pdf for font help)
+% (This matches ConTeXt defaults)
+
+%%% ToC (table of contents) APPEARANCE
+\usepackage[nottoc,notlof,notlot]{tocbibind} % Put the bibliography in the ToC
+\usepackage[titles,subfigure]{tocloft} % Alter the style of the Table of Contents
+\renewcommand{\cftsecfont}{\rmfamily\mdseries\upshape}
+\renewcommand{\cftsecpagefont}{\rmfamily\mdseries\upshape} % No bold!
+
+%%% END Article customizations
+
+%%% The "real" document content comes below...
+
+\title{Hashing I - The Basics}
+\author{B. Smith}
+%\date{} % Activate to display a given date or no date (if empty),
+         % otherwise the current date is printed 
+
+\begin{document}
+\maketitle
+
+\section{Counting and Digits}
+
+
+The basic idea of hashing is to map value (string, number, object, etc.) to an array position, an array index.  For example we may want to map the name "Joe" into array position  3.  I.e., want to "associate"  the string "Joe" with the array index '3', and we wish to do this for ease and speed of storage and retrieval.  If we can do this type of mapping, it allows us to capitalize on the speed that an array provides (vs a tree).
+
+\section{time vs. space: the trade-off}
+How can we associate data with a position?  It depends on the type of data we wish to map.  Let's call the item that we will use for lookup the "key" since it will be used to unlock and retrieve the data or "value."  So when talking about hashing, as with trees, maps, dictionaries, etc., we are thinking in terms of key/value pairs.  Hd the key been  "335178," we could easily associate this with an integer.  The tradeoff for this simplicity is space.  A fairly large array must be declared if we are to allow indices this large.
+
+\section{collisions: mapping to the same space}
+If we use the first 3 digits of a social security number, that too has problems since many folks from the same region will have the same first few numbers, and therefore we'll see many "collisions" and more time is thus required to resolve these collisions.
+The art of hashing is about managing this trade-off between time and space.
+
+\section{perfect hashing if unlimited space and integer sizes}
+First, let's think about converting other digits and characters to integers
+
+\begin{verbatim}
+Decimal Binary Octal Hex 
+0 0 0 0 
+1 1 1 1 
+2 10 2 2 
+3 11 3 3 
+4 100 4 4 
+5 101 5 5 
+6 110 6 6 
+7 111 7 7 
+8 1000 10 8 
+9 1001 11 9 
+10 1010 12 A 
+11 1011 13 B 
+12 1100 14 C 
+13 1101 15 D 
+14 1110 16 E 
+15 1111 17 F 
+16 10000 20 10 
+17 10001 21 11  
+
+
+\end{verbatim}
+
+
+
+
+NB:    $2753_{10}   =  2000 + 700 + 50 + 3  = 
+2 \times 10^3 + 7 \times 10^2 + 5 \times 10^1 + 3 \times 10^0 $ \\
+
+
+Similarly, in base 2:   $1011_2 = 1 \times 2^3  +  0 \times 2^2  + 1\times2^ +1\times2^0  = 8 + 0 + 2 + 1 = 11_{10}$
+
+Also:
+\\
+$10_{16}  = 1 \times 16^1 + 0 = 16$ \\
+$11_{16} = 1 \times 16^1 + 1\times16^0 = 17$ \\
+$1F_{16} = 1 \times 16^1 + 15\times16^0 = 31$ \\
+$3FA4_{16} = 3(16^3) + 15(16^2) + 10(16^1) + 4(16^0)$  \\
+
+Base 26  \\
+\begin{math}
+a \rightarrow 1 \\
+b \rightarrow 2 \\
+c \rightarrow 3 \\
+\vdots  \\
+z \rightarrow 26 \\
+\end{math}
+
+therefore:   "bad"  maps to $'b' \times 26^2 + 'a' \times 26^1 + 'd' \times 26^0$  \\
+
+                                  $ = 2 \times 26^2 + 1 \times 26^1 + 4 \times 26^0$  \\
+
+
+
+"baba" maps to   $2 \times 26^3 + 1 \times 26^2 + 2 x 26^1 + 1 \times 26^0 $  \\
+
+
+
+
+
+In the same manner that digits are used to make numbers, characters can be considered digits, each one with a particular numerical value.  This is important since we will always have a unique representation for a given sequence of characters; no two sequence of characters will ever map to the same value.  We will always have a perfect hash value in that we will never have collisions.  Recall that people that live in the region may have soc sec numbers whose first few digits result in their being mapped to currently occupied positions. ...
+
+% PIGEON HOLE PRINCIPLE
+
+The good thing is that we've accomplished perfect hashing!  There is a unique integer value for every possible word, every sequence of characters.
+
+The bad thing: 
+
+1) The integers are HUGE.  Long words will generate large integers.  In factor, programs will generally not allow you to arbitrarily represent every imaginable integer; there is an upper limit to the magnitude of representable integers.  As of 2011, Java allows for integers to have  values in the range [$-2^{31}$ to  $2^{31}-1$]. \\
+
+% Java doesn't have unsigned integers
+
+ (NB: java.lang.Long does specify  [$-2^{63}$ to  $2^{63}-1$] ).
+
+\begin{verbatim}
+long l = Long.MAX_VALUE;
+System.out.println(l); // 9223372036854775807
+\end{verbatim}
+
+2)  The size of hashed integer values get longer with words.  If we consider that we need at least base 26 to perfect hashing, or base 52 for upper and lower case hashings, then hashing "bidder" would be $( ) \times 26^5+  ( ) \times 26^4+ ( ) \times 26^3+ ( ) \times 26^2+( ) \times 26^1+ ( ) \times 26^0$  or if we're working with base 52:  $( ) \times 52^5+  ( ) \times 52^4+ ( ) \times 52^3+ ( ) \times 52^2+( ) \times 52^1+ ( ) \times 52^0$. 
+
+More realistically, we use more than 52 characters.  Think about how many characters there are on your keyboard.  ASCII (American Standdard Code for Information Interchange) which is used to define 128 characters.  The base, in this case, might be 128, so words that have 10 characters would have values no less than $128^9 = 9.223 \times 10^{18}$, a value beyond standard Java int containers.  We could use Long integers, but we lose speed when moving from the primitive int to the object Long.
+
+\subsection{Fixing the time issue: Horner's Rule}
+Another important point is that for a 6 character string we will have  $0 + 1 + 2 + 3 + 4 + 5$ multiplications.  (Note that $2 \times 52^2$ is comprised of 3 factors (2, 52, 52) but 2 operations.)
+
+In general, for an N character string, $1 + 2 + \ldots + (N-1)$ multiplications are required.  As N gets the large, the number of multiplications becomes large quadratically, i.e., the number of multiplications for N characters is
+ $\frac{N(N-1)}{2}  \approx  N^2$.
+
+We could reduce the time required to hash a string if we could reduce the number of multiplications.  We can do this by using Horner's Rule, which is an algorithm that proivdes us a way to use, for example, the fact that having the answer to $26^2$ should make it quicker to calculate $26^3$.
+"baba": $2 \times 26^3 + 1 \times 26^2 + 2 \times 26^1 + 1 \times 26^0 $.
+
+Let x = 26, then we can write  this expression as
+$2 \times x^3 + 1 \times x^2 + 2 \times x^1 + 1 \times x^0 =2 x^3 + 1  x^2 + 2  x^1 + 1 $. 
+ 
+which we will first modify by removing the exponents:
+$2  x + 1  x + 2  x + 1 $.  The one  in the second term is present for ease of conversion to Horner representation.
+
+Finally, we can rewrite the above as $(((2( x ) + 1) x  + 2 ) x + 1 )$
+
+Example:  convert the following using Horner's Rule:
+$5 x^4 + 3  x^3 + 2  x^2 + 7x^1 + 3 $
+
+
+answer: $((((5 (x) + 3)  x+ 2)  x + 7)x + 3) $
+
+
+If the number of characters in the string is expressed as $| S |$, we can see that the number of multiplications is $ |S|$  vs $ |S|^2$ .  For the quadratic above, using Horners, only 4 multiplications are required.
+
+
+
+ \subsection{Fixing the space issue: Modulus}
+Since the table size would be huge if our hashing scheme for strings is left as is, we would like to minimize the huge waste in space that results from having to declare an array with valid indices appropriate for ``perfect'' hashing.  A value of $256^10$ results in a value of 1.208e24.  For strings of 11 characters, our hash table (the array) would have to be at least this size.  Actually, since hash tables for two character keys between 0 and 99 require an array of size $10^2$, hash tables with 10 character keys require an array of size $256^10$.
+ 
+To reduce the size of our table, we can use the modulus operator, but we do so at the risk of having keys hash to the same index.  Nonetheless, that's the price that we're willing to pay.  If we have multiple keys that hash to the same spot we have a collision.  An essential element to hashing schemes is handling those collisions, i.e., collision resolution.  First, let's look at the modulus operator.  Since the operator "distributes" we can use this fact to keep the table index within its proper range.
+
+If we were to make the unfortunate choice of selecting 256 as the modulus, this would amount to simply using 100 \% 256 as the key.
+
+
+
+
+
+
+\end{document}
